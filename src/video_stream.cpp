@@ -142,6 +142,8 @@ int main(int argc, char** argv)
     image_transport::ImageTransport it(nh);
     image_transport::CameraPublisher pub = it.advertiseCamera("camera", 1);
 
+    ROS_INFO_STREAM("OpenCV version: " << CV_MAJOR_VERSION << "." << CV_MINOR_VERSION << "." << CV_SUBMINOR_VERSION);
+
     // provider can be an url (e.g.: rtsp://10.0.0.1:554) or a number of device, (e.g.: 0 would be /dev/video0)
     if (_nh.getParam("video_stream_provider", video_stream_provider)){
         ROS_INFO_STREAM("Resource video_stream_provider: " << video_stream_provider);
@@ -160,6 +162,7 @@ int main(int argc, char** argv)
             }
             else if(video_stream_provider.find("rtsp://") != std::string::npos){
                 video_stream_provider_type = "rtsp_stream";
+                setenv("OPENCV_FFMPEG_CAPTURE_OPTIONS", "rtsp_transport;udp", 1);
             }
             else {
                 // Check if file exists to know if it's a videofile
@@ -172,6 +175,7 @@ int main(int argc, char** argv)
                     video_stream_provider_type = "unknown";
             }
             cap.open(video_stream_provider);
+            unsetenv("OPENCV_FFMPEG_CAPTURE_OPTIONS");
         }
     }
     else{
